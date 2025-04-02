@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실행 키 생성기</title>
+</head>
+<body>
+    <h1>파이썬 실행 키 생성기</h1>
+
+    <label for="nonce">🔹 난수 입력: </label>
+    <input type="text" id="nonce">
+    <button id="generate_button">실행 키 생성</button>
+
+    <p>🔹 실행키: <span id="execution_key"></span></p>  <!-- 실행 키가 여기에 출력됩니다 -->
+
+    <script>
+        // 🔑 비밀 키 (중요!)
+        const SECRET_KEY = "happinessyoon";
+
+        // SHA-256 해시 생성 함수
+        async function generateExecutionKey(nonce) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(nonce + SECRET_KEY);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, "0")).join("");
+            return hashHex.substring(0, 8);  // 앞 8자리 사용
+        }
+
+        // 버튼 클릭 시 호출될 함수
+        async function generateKey() {
+            const nonce = document.querySelector("#nonce").value;
+            if (nonce) {
+                const executionKey = await generateExecutionKey(nonce);
+                document.querySelector("#execution_key").innerText = executionKey;  // 실행 키 출력
+            } else {
+                document.querySelector("#execution_key").innerText = "❌ 난수를 입력하세요!";  // 오류 메시지
+            }
+        }
+
+        // 버튼에 이벤트 리스너 추가
+        document.querySelector("#generate_button").addEventListener("click", generateKey);
+    </script>
+</body>
+</html>
